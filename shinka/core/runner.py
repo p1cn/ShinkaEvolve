@@ -114,7 +114,7 @@ class EvolutionRunner:
 
             # Set up logging with both console and file handlers
             logging.basicConfig(
-                level=logging.INFO,
+                level=logging.DEBUG,  # 🔍 修改为 DEBUG 级别
                 format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                 datefmt="%Y-%m-%d %H:%M:%S",
                 handlers=[

@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+ShinkaEvolve 静态网页构建工具
+
+将数据库数据注入到 HTML 模板中，生成可以直接在浏览器中打开的静态网页。
+"""
+
+import sys
+from shinka.webui.build_static import main
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+

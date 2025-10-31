@@ -27,6 +27,7 @@ OPENAI_EMBEDDING_COSTS = {
 
 
 def get_client_model(model_name: str) -> tuple[openai.OpenAI, str]:
+    OPENAI_EMBEDDING_MODELS.append(model_name)
     if model_name in OPENAI_EMBEDDING_MODELS:
         client = openai.OpenAI()
         model_to_use = model_name
@@ -80,14 +81,22 @@ class EmbeddingClient:
             response = self.client.embeddings.create(
                 model=self.model, input=code, encoding_format="float"
             )
-            cost = response.usage.total_tokens * OPENAI_EMBEDDING_COSTS[self.model]
+            # 计算成本，如果模型不在定价表中则使用默认值 0
+            cost_per_token = OPENAI_EMBEDDING_COSTS.get(self.model, 0.0)
+            cost = response.usage.total_tokens * cost_per_token
+            
+            if cost_per_token == 0.0 and self.verbose:
+                logger.warning(
+                    f"模型 '{self.model}' 不在定价表中，成本将记录为 0"
+                )
+            
             # Extract embedding from response
             if single_code:
                 return response.data[0].embedding, cost
             else:
                 return [d.embedding for d in response.data], cost
         except Exception as e:
-            logger.info(f"Error getting embedding: {e}")
+            logger.error(f"获取 embedding 时出错: {e}", exc_info=True)
             if single_code:
                 return [], 0.0
             else:

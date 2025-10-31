@@ -268,8 +268,17 @@ class LLMClient:
                     logger.info(f"==> QUERY: API cost: ${result.cost:.4f}")
                 return result
             except Exception as e:
-                logger.error(f"{try_count + 1}/{MAX_RETRIES} Error in query: {str(e)}")
+                import traceback
+                error_details = traceback.format_exc()
+                logger.error(
+                    f"{try_count + 1}/{MAX_RETRIES} Error in query: {type(e).__name__}: {str(e)}\n"
+                    f"Model: {llm_kwargs.get('model_name', 'unknown')}\n"
+                    f"Full traceback:\n{error_details}"
+                )
                 try_count += 1
+        logger.error(
+            f"Query failed after {MAX_RETRIES} retries. Model: {llm_kwargs.get('model_name', 'unknown')}"
+        )
         return None
 
 

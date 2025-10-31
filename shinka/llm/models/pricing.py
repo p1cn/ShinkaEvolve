@@ -4,6 +4,9 @@
 # DeepSeek: https://api-docs.deepseek.com/quick_start/pricing/
 # Gemini: https://ai.google.dev/gemini-api/docs/pricing
 
+import os
+
+
 M = 1000000
 
 CLAUDE_MODELS = {
@@ -38,6 +41,10 @@ CLAUDE_MODELS = {
 }
 
 OPENAI_MODELS = {
+    os.getenv("MODEL_NAME"): {
+        "input_price": 0.0 / M,
+        "output_price": 0.0 / M,
+    },
     "gpt-4o-mini": {
         "input_price": 0.15 / M,
         "output_price": 0.6 / M,
@@ -200,3 +207,37 @@ REASONING_BEDROCK_MODELS = [
     "bedrock/us.anthropic.claude-3-7-sonnet-20250219-v1:0",
     "bedrock/us.anthropic.claude-sonnet-4-20250514-v1:0",
 ]
+
+
+def get_model_pricing(model_name: str, model_dict: dict) -> dict:
+    """获取模型定价信息，如果模型不在定价表中，返回零价格。
+    
+    Args:
+        model_name: 模型名称
+        model_dict: 定价字典
+        
+    Returns:
+        包含 input_price 和 output_price 的字典
+    """
+    if model_name in model_dict:
+        return model_dict[model_name]
+    else:
+        # 未知模型使用零价格
+        return {
+            "input_price": 0.0 / M,
+            "output_price": 0.0 / M,
+        }
+
+
+def ensure_model_in_pricing(model_name: str, model_dict: dict) -> None:
+    """确保模型在定价表中，如果不存在则添加零价格。
+    
+    Args:
+        model_name: 模型名称
+        model_dict: 定价字典（会被修改）
+    """
+    if model_name not in model_dict:
+        model_dict[model_name] = {
+            "input_price": 0.0 / M,
+            "output_price": 0.0 / M,
+        }

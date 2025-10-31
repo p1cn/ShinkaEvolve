@@ -8,9 +8,11 @@ from dotenv import load_dotenv
 from .models.pricing import (
     CLAUDE_MODELS,
     BEDROCK_MODELS,
+    M,
     OPENAI_MODELS,
     DEEPSEEK_MODELS,
     GEMINI_MODELS,
+    ensure_model_in_pricing,
 )
 
 env_path = Path(__file__).parent.parent.parent / ".env"
@@ -18,67 +20,23 @@ load_dotenv(dotenv_path=env_path, override=True)
 
 
 def get_client_llm(model_name: str, structured_output: bool = False) -> Tuple[Any, str]:
-    """Get the client and model for the given model name.
+    """获取给定模型名称的客户端和模型。
+    
+    默认所有模型都使用 OpenAI 接口。如果模型不在定价表中，会自动添加零价格。
 
     Args:
-        model_name (str): The name of the model to get the client.
-
-    Raises:
-        ValueError: If the model is not supported.
+        model_name: 模型名称
+        structured_output: 是否需要结构化输出
 
     Returns:
-        The client and model for the given model name.
+        客户端和模型名称的元组
     """
-    # print(f"Getting client for model {model_name}")
-    if model_name in CLAUDE_MODELS.keys():
-        client = anthropic.Anthropic()
-        if structured_output:
-            client = instructor.from_anthropic(
-                client, mode=instructor.mode.Mode.ANTHROPIC_JSON
-            )
-    elif model_name in BEDROCK_MODELS.keys():
-        model_name = model_name.split("/")[-1]
-        client = anthropic.AnthropicBedrock(
-            aws_access_key=os.getenv("AWS_ACCESS_KEY_ID"),
-            aws_secret_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-            aws_region=os.getenv("AWS_REGION_NAME"),
-        )
-        if structured_output:
-            client = instructor.from_anthropic(
-                client, mode=instructor.mode.Mode.ANTHROPIC_JSON
-            )
-    elif model_name in OPENAI_MODELS.keys():
-        client = openai.OpenAI()
-        if structured_output:
-            client = instructor.from_openai(client, mode=instructor.Mode.TOOLS_STRICT)
-    elif model_name.startswith("azure-"):
-        # get rid of the azure- prefix
-        model_name = model_name.split("azure-")[-1]
-        client = openai.AzureOpenAI(
-            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            api_version=os.getenv("AZURE_API_VERSION"),
-            azure_endpoint=os.getenv("AZURE_API_ENDPOINT"),
-        )
-        if structured_output:
-            client = instructor.from_openai(client, mode=instructor.Mode.TOOLS_STRICT)
-    elif model_name in DEEPSEEK_MODELS.keys():
-        client = openai.OpenAI(
-            api_key=os.environ["DEEPSEEK_API_KEY"],
-            base_url="https://api.deepseek.com",
-        )
-        if structured_output:
-            client = instructor.from_openai(client, mode=instructor.Mode.MD_JSON)
-    elif model_name in GEMINI_MODELS.keys():
-        client = openai.OpenAI(
-            api_key=os.environ["GEMINI_API_KEY"],
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-        )
-        if structured_output:
-            client = instructor.from_openai(
-                client,
-                mode=instructor.Mode.GEMINI_JSON,
-            )
-    else:
-        raise ValueError(f"Model {model_name} not supported.")
-
+    # 确保模型在定价表中（如果不存在则添加零价格）
+    ensure_model_in_pricing(model_name, OPENAI_MODELS)
+    
+    # 默认使用 OpenAI 客户端
+    client = openai.OpenAI()
+    if structured_output:
+        client = instructor.from_openai(client, mode=instructor.Mode.TOOLS_STRICT)
+    
     return client, model_name

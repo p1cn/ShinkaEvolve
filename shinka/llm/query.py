@@ -1,5 +1,7 @@
 from typing import List, Union, Optional, Dict
 import random
+import os
+import openai
 from pydantic import BaseModel
 from .client import get_client_llm
 from .models.pricing import (
@@ -198,27 +200,37 @@ def query(
     **kwargs,
 ) -> QueryResult:
     """Query the LLM."""
-    client, model_name = get_client_llm(
-        model_name, structured_output=output_model is not None
-    )
-    if model_name in CLAUDE_MODELS.keys() or "anthropic" in model_name:
-        query_fn = query_anthropic
-    elif model_name in OPENAI_MODELS.keys():
-        query_fn = query_openai
-    elif model_name in DEEPSEEK_MODELS.keys():
-        query_fn = query_deepseek
-    elif model_name in GEMINI_MODELS.keys():
-        query_fn = query_gemini
-    else:
-        raise ValueError(f"Model {model_name} not supported.")
-    result = query_fn(
-        client,
-        model_name,
-        msg,
-        system_msg,
-        msg_history,
-        output_model,
-        model_posteriors=model_posteriors,
-        **kwargs,
-    )
-    return result
+    logger.debug(f"query() called with model_name: {model_name}")
+    logger.debug(f"query() kwargs: {list(kwargs.keys())}")
+    
+    try:
+        client = openai.OpenAI(
+            base_url=os.getenv("OPENAI_BASE_URL"),
+            api_key=os.getenv("OPENAI_API_KEY"),
+        )
+        logger.debug(f"OpenAI client created successfully. Base URL: {client.base_url}")
+    except Exception as e:
+        logger.error(f"Failed to create OpenAI client: {type(e).__name__}: {str(e)}")
+        raise
+    
+    query_fn = query_openai
+    logger.debug(f"Using query function: {query_fn.__name__}")
+    
+    try:
+        result = query_fn(
+            client,
+            model_name,
+            msg,
+            system_msg,
+            msg_history,
+            output_model,
+            model_posteriors=model_posteriors,
+            **kwargs,
+        )
+        logger.debug(f"Query completed successfully. Result type: {type(result)}")
+        return result
+    except Exception as e:
+        logger.error(f"Query function failed: {type(e).__name__}: {str(e)}")
+        logger.error(f"Model: {model_name}")
+        logger.error(f"Message preview: {msg[:200] if msg else 'None'}...")
+        raise
