@@ -38,6 +38,10 @@ CLAUDE_MODELS = {
         "input_price": 3.0 / M,
         "output_price": 15.0 / M,
     },
+    "claude-sonnet-4-5-20250929": {
+        "input_price": 3.0 / M,
+        "output_price": 15.0 / M,
+    },
 }
 
 OPENAI_MODELS = {
@@ -183,6 +187,7 @@ REASONING_OAI_MODELS = [
 REASONING_CLAUDE_MODELS = [
     "claude-3-7-sonnet-20250219",
     "claude-4-sonnet-20250514",
+    "claude-sonnet-4-5-20250929",
 ]
 
 REASONING_DEEPSEEK_MODELS = [

@@ -48,6 +48,7 @@ dependencies = [
     "pyarrow>=21.0.0",
     "plotly>=6.3.1",
     "umap>=0.1.1",
+    "google-generativeai",
 ]
 
 [tool.setuptools]
@@ -59,8 +60,8 @@ include = ["shinka", "shinka.*"]
 [tool.setuptools.package-data]
 "*" = ["*"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=6.0",
     "black",
     "isort",
