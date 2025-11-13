@@ -173,7 +173,8 @@ class EvolutionRunner:
         self.llm = LLMClient(
             model_names=evo_config.llm_models,
             model_selection=self.llm_selection,
-            **evo_config.llm_kwargs,
+            api_key=evo_config.llm_kwargs.get("api_key", None),
+            base_url=evo_config.llm_kwargs.get("base_url", None),
             verbose=verbose,
         )
         if evo_config.embedding_model is not None:
@@ -189,7 +190,8 @@ class EvolutionRunner:
         if evo_config.meta_llm_models is not None:
             self.meta_llm = LLMClient(
                 model_names=evo_config.meta_llm_models,
-                **evo_config.meta_llm_kwargs,
+                api_key=evo_config.meta_llm_kwargs.get("api_key", None),
+                base_url=evo_config.meta_llm_kwargs.get("base_url", None),
                 verbose=verbose,
             )
         else:
@@ -198,7 +200,8 @@ class EvolutionRunner:
         if evo_config.novelty_llm_models is not None:
             self.novelty_llm = LLMClient(
                 model_names=evo_config.novelty_llm_models,
-                **evo_config.novelty_llm_kwargs,
+                api_key=evo_config.novelty_llm_kwargs.get("api_key", None),
+                base_url=evo_config.novelty_llm_kwargs.get("base_url", None),
                 verbose=verbose,
             )
         else:
