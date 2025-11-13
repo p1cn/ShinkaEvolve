@@ -76,7 +76,8 @@ class EmbeddingClient:
         Args:
             model (str): The OpenAI, Azure, or Gemini embedding model name to use.
         """
-        self.client, self.model = get_client_model(model_name, **kwargs)
+        if kwargs:
+            self.client, self.model = get_client_model(model_name, **kwargs)
         self.model_name = model_name
         self.verbose = verbose
 
