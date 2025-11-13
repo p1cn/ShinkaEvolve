@@ -180,7 +180,8 @@ class EvolutionRunner:
             self.embedding = EmbeddingClient(
                 model_name=evo_config.embedding_model,
                 verbose=verbose,
-                **evo_config.llm_kwargs,
+                api_key=evo_config.llm_kwargs.get("api_key", None),
+                base_url=evo_config.llm_kwargs.get("base_url", None),
             )
         else:
             self.embedding = None
