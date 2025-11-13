@@ -38,13 +38,12 @@ GEMINI_EMBEDDING_COSTS = {
 }
 
 def get_client_model(model_name: str, **kwargs) -> tuple[Union[openai.OpenAI, str], str]:
-    OPENAI_EMBEDDING_MODELS.append(model_name)
+    return openai.OpenAI(
+        base_url=kwargs.get("base_url", None),
+        api_key=kwargs.get("api_key", None),
+    ), model_name
     if model_name in OPENAI_EMBEDDING_MODELS:
-        client = openai.OpenAI(
-            base_url=kwargs.get("base_url", None),
-            api_key=kwargs.get("api_key", None),
-        )
-        model_to_use = model_name
+        pass
     elif model_name in AZURE_EMBEDDING_MODELS:
         # get rid of the azure- prefix
         model_to_use = model_name.split("azure-")[-1]
