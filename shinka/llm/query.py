@@ -190,6 +190,8 @@ def query(
     msg: str,
     system_msg: str,
     msg_history: List = [],
+    api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
     output_model: Optional[BaseModel] = None,
     model_posteriors: Optional[Dict[str, float]] = None,
     **kwargs,
@@ -200,8 +202,8 @@ def query(
     
     try:
         client = openai.OpenAI(
-            base_url=kwargs.get("base_url", None),
-            api_key=kwargs.get("api_key", None),
+            base_url=base_url,
+            api_key=api_key,
         )
         logger.debug(f"OpenAI client created successfully. Base URL: {client.base_url}")
     except Exception as e:
@@ -228,4 +230,40 @@ def query(
         logger.error(f"Query function failed: {type(e).__name__}: {str(e)}")
         logger.error(f"Model: {model_name}")
         logger.error(f"Message preview: {msg[:200] if msg else 'None'}...")
+        raise
+
+
+async def query_async(
+    model_name: str,
+    msg: str,
+    system_msg: str,
+    msg_history: List = [],
+    output_model: Optional[BaseModel] = None,
+    model_posteriors: Optional[Dict[str, float]] = None,
+    **kwargs,
+) -> QueryResult:
+    """Query the LLM asynchronously."""
+    logger.debug(f"query_async() called with model_name: {model_name}")
+    logger.debug(f"query_async() kwargs: {list(kwargs.keys())}")
+    
+    try:
+        # For now, we'll use the synchronous version wrapped
+        # In a real implementation, you'd want to use async clients
+        import asyncio
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None,
+            lambda: query(
+                model_name=model_name,
+                msg=msg,
+                system_msg=system_msg,
+                msg_history=msg_history,
+                output_model=output_model,
+                model_posteriors=model_posteriors,
+                **kwargs,
+            )
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Async query function failed: {type(e).__name__}: {str(e)}")
         raise

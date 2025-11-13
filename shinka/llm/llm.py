@@ -6,7 +6,7 @@ import multiprocessing as mp
 import asyncio
 from pydantic import BaseModel
 import time
-from .query import sample_model_kwargs, query
+from .query import sample_model_kwargs, query, query_async
 from .models import QueryResult
 from .dynamic_sampling import BanditBase, FixedSampler
 
@@ -26,6 +26,8 @@ class LLMClient:
         model_sample_probs: Optional[List[float]] = None,
         output_model: Optional[BaseModel] = None,
         verbose: bool = True,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
     ):
         self.temperatures = temperatures
         self.max_tokens = max_tokens
@@ -44,7 +46,9 @@ class LLMClient:
         self.output_model = output_model
         self.structured_output = output_model is not None
         self.verbose = verbose
-
+        self.api_key = api_key
+        self.base_url = base_url
+        
     def batch_query(
         self,
         num_samples: int,
@@ -87,6 +91,8 @@ class LLMClient:
                             num_samples,
                             self.output_model,
                             self.verbose,
+                            self.api_key,
+                            self.base_url,
                         ),
                     )
                 )
@@ -171,6 +177,8 @@ class LLMClient:
                             self.output_model,
                             num_samples,
                             self.verbose,
+                            self.api_key,
+                            self.base_url,
                         ),
                     )
                 )
@@ -262,6 +270,8 @@ class LLMClient:
                     msg_history=msg_history,
                     output_model=self.output_model,
                     model_posteriors=model_posteriors,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
                     **llm_kwargs,
                 )
                 if self.verbose and hasattr(result, "cost") and result.cost is not None:
@@ -293,6 +303,8 @@ class AsyncLLMClient:
         model_sample_probs: Optional[List[float]] = None,
         output_model: Optional[BaseModel] = None,
         verbose: bool = True,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
     ):
         self.temperatures = temperatures
         self.max_tokens = max_tokens
@@ -311,6 +323,8 @@ class AsyncLLMClient:
         self.output_model = output_model
         self.structured_output = output_model is not None
         self.verbose = verbose
+        self.api_key = api_key
+        self.base_url = base_url
 
     async def batch_query(
         self,
@@ -508,6 +522,8 @@ class AsyncLLMClient:
                     msg_history=msg_history,
                     output_model=self.output_model,
                     model_posteriors=model_posteriors,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
                     **llm_kwargs,
                 )
                 if self.verbose and hasattr(result, "cost") and result.cost is not None:
@@ -542,6 +558,8 @@ class AsyncLLMClient:
                     system_msg=system_msg,
                     msg_history=msg_history,
                     output_model=self.output_model,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
                     **kwargs,
                 )
                 return idx, result
@@ -590,6 +608,8 @@ class AsyncLLMClient:
                     msg_history=msg_history,
                     output_model=self.output_model,
                     model_posteriors=model_posteriors,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
                     **kwargs,
                 )
                 return idx, result
@@ -613,6 +633,8 @@ class AsyncLLMClient:
         model_sample_probs: Optional[List[float]] = None,
         output_model: Optional[BaseModel] = None,
         verbose: bool = True,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
     ):
         self.temperatures = temperatures
         self.max_tokens = max_tokens
@@ -631,6 +653,8 @@ class AsyncLLMClient:
         self.output_model = output_model
         self.structured_output = output_model is not None
         self.verbose = verbose
+        self.api_key = api_key
+        self.base_url = base_url
 
     async def batch_query(
         self,
@@ -828,6 +852,8 @@ class AsyncLLMClient:
                     msg_history=msg_history,
                     output_model=self.output_model,
                     model_posteriors=model_posteriors,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
                     **llm_kwargs,
                 )
                 if self.verbose and hasattr(result, "cost") and result.cost is not None:
@@ -862,6 +888,8 @@ class AsyncLLMClient:
                     system_msg=system_msg,
                     msg_history=msg_history,
                     output_model=self.output_model,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
                     **kwargs,
                 )
                 return idx, result
@@ -910,6 +938,8 @@ class AsyncLLMClient:
                     msg_history=msg_history,
                     output_model=self.output_model,
                     model_posteriors=model_posteriors,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
                     **kwargs,
                 )
                 return idx, result
@@ -933,6 +963,8 @@ class AsyncLLMClient:
         model_sample_probs: Optional[List[float]] = None,
         output_model: Optional[BaseModel] = None,
         verbose: bool = True,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
     ):
         self.temperatures = temperatures
         self.max_tokens = max_tokens
@@ -951,6 +983,8 @@ class AsyncLLMClient:
         self.output_model = output_model
         self.structured_output = output_model is not None
         self.verbose = verbose
+        self.api_key = api_key
+        self.base_url = base_url
 
     async def batch_query(
         self,
@@ -1148,6 +1182,8 @@ class AsyncLLMClient:
                     msg_history=msg_history,
                     output_model=self.output_model,
                     model_posteriors=model_posteriors,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
                     **llm_kwargs,
                 )
                 if self.verbose and hasattr(result, "cost") and result.cost is not None:
@@ -1182,6 +1218,8 @@ class AsyncLLMClient:
                     system_msg=system_msg,
                     msg_history=msg_history,
                     output_model=self.output_model,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
                     **kwargs,
                 )
                 return idx, result
@@ -1230,6 +1268,8 @@ class AsyncLLMClient:
                     msg_history=msg_history,
                     output_model=self.output_model,
                     model_posteriors=model_posteriors,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
                     **kwargs,
                 )
                 return idx, result
@@ -1251,6 +1291,8 @@ def query_fn(
     total_samples: int = 1,
     output_model: Optional[BaseModel] = None,
     verbose: bool = False,
+    api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
 ) -> tuple[int, Optional[QueryResult]]:
     if verbose:
         logger.info(f"==> SAMPLING: {idx + 1}/{total_samples} {list(kwargs.values())}")
@@ -1262,6 +1304,8 @@ def query_fn(
                 system_msg=system_msg,
                 msg_history=msg_history,
                 output_model=output_model,
+                api_key=api_key,
+                base_url=base_url,
                 **kwargs,
             )
             return idx, result
@@ -1289,6 +1333,8 @@ def sample_kwargs_query_fn(
     output_model: Optional[BaseModel] = None,
     total_samples: int = 1,
     verbose: bool = False,
+    api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
 ) -> tuple[int, Optional[QueryResult]]:
     kwargs = sample_model_kwargs(
         model_names=model_names,
@@ -1314,6 +1360,8 @@ def sample_kwargs_query_fn(
                 msg_history=msg_history,
                 output_model=output_model,
                 model_posteriors=model_posteriors,
+                api_key=api_key,
+                base_url=base_url,
                 **kwargs,
             )
             return idx, result

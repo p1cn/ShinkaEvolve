@@ -37,10 +37,10 @@ GEMINI_EMBEDDING_COSTS = {
     "gemini-embedding-001": 0.0 / M,  # Check current pricing
 }
 
-def get_client_model(model_name: str, **kwargs) -> tuple[Union[openai.OpenAI, str], str]:
+def get_client_model(model_name: str, api_key: Optional[str] = None, base_url: Optional[str] = None) -> tuple[Union[openai.OpenAI, str], str]:
     return openai.OpenAI(
-        base_url=kwargs.get("base_url", None),
-        api_key=kwargs.get("api_key", None),
+        base_url=base_url,
+        api_key=api_key,
     ), model_name
     if model_name in OPENAI_EMBEDDING_MODELS:
         pass
@@ -68,7 +68,7 @@ def get_client_model(model_name: str, **kwargs) -> tuple[Union[openai.OpenAI, st
 
 class EmbeddingClient:
     def __init__(
-        self, model_name: str = "text-embedding-3-small", verbose: bool = False, **kwargs
+        self, model_name: str = "text-embedding-3-small", verbose: bool = False, api_key: Optional[str] = None, base_url: Optional[str] = None
     ):
         """
         Initialize the EmbeddingClient.
@@ -76,8 +76,8 @@ class EmbeddingClient:
         Args:
             model (str): The OpenAI, Azure, or Gemini embedding model name to use.
         """
-        if kwargs:
-            self.client, self.model = get_client_model(model_name, **kwargs)
+        if api_key or base_url:
+            self.client, self.model = get_client_model(model_name, api_key=api_key, base_url=base_url)
         self.model_name = model_name
         self.verbose = verbose
 
