@@ -15,6 +15,28 @@ MAX_RETRIES = 3
 logger = logging.getLogger(__name__)
 
 
+def clean_messages(messages: List[Dict]) -> List[Dict]:
+    """清理消息列表，确保所有消息都有非空content
+    
+    Args:
+        messages: 消息列表
+        
+    Returns:
+        清理后的消息列表
+    """
+    cleaned = []
+    for msg in messages:
+        if msg.get('role') == 'assistant' and not msg.get('content', '').strip():
+            # 为空的assistant消息添加占位符
+            cleaned.append({
+                'role': 'assistant',
+                'content': '[Previous response failed]'
+            })
+        elif msg.get('content', '').strip():
+            cleaned.append(msg)
+    return cleaned
+
+
 class LLMClient:
     def __init__(
         self,
@@ -72,6 +94,9 @@ class LLMClient:
             msg_history = [[]] * num_samples
         elif isinstance(msg_history[0], dict):
             msg_history = [msg_history] * num_samples
+        
+        # 清理所有消息历史
+        msg_history = [clean_messages(mh) for mh in msg_history]
 
         # multiprocess sample_kwargs_query
         num_processes = min(num_samples, mp.cpu_count())
@@ -148,6 +173,9 @@ class LLMClient:
             msg_history = [[]] * num_samples
         elif isinstance(msg_history[0], dict):
             msg_history = [msg_history] * num_samples
+        
+        # 清理所有消息历史
+        msg_history = [clean_messages(mh) for mh in msg_history]
 
         # multiprocess sample_kwargs_query
         num_processes = min(num_samples, mp.cpu_count())
@@ -246,6 +274,9 @@ class LLMClient:
         Returns:
             QueryResult: The result of the query.
         """
+        # 清理消息历史
+        msg_history = clean_messages(msg_history)
+        
         if llm_kwargs is None:
             llm_kwargs = sample_model_kwargs(
                 model_names=self.model_names,
@@ -349,6 +380,9 @@ class AsyncLLMClient:
             msg_history = [[]] * num_samples
         elif isinstance(msg_history[0], dict):
             msg_history = [msg_history] * num_samples
+        
+        # 清理所有消息历史
+        msg_history = [clean_messages(mh) for mh in msg_history]
 
         # Create async tasks
         tasks = []
@@ -413,6 +447,9 @@ class AsyncLLMClient:
             msg_history = [[]] * num_samples
         elif isinstance(msg_history[0], dict):
             msg_history = [msg_history] * num_samples
+        
+        # 清理所有消息历史
+        msg_history = [clean_messages(mh) for mh in msg_history]
 
         # Get posterior probabilities
         posterior = self.llm_selection.posterior(samples=num_samples)
@@ -497,6 +534,9 @@ class AsyncLLMClient:
         Returns:
             QueryResult: The result of the query.
         """
+        # 清理消息历史
+        msg_history = clean_messages(msg_history)
+        
         if llm_kwargs is None:
             llm_kwargs = sample_model_kwargs(
                 model_names=self.model_names,
@@ -679,6 +719,9 @@ class AsyncLLMClient:
             msg_history = [[]] * num_samples
         elif isinstance(msg_history[0], dict):
             msg_history = [msg_history] * num_samples
+        
+        # 清理所有消息历史
+        msg_history = [clean_messages(mh) for mh in msg_history]
 
         # Create async tasks
         tasks = []
@@ -743,6 +786,9 @@ class AsyncLLMClient:
             msg_history = [[]] * num_samples
         elif isinstance(msg_history[0], dict):
             msg_history = [msg_history] * num_samples
+        
+        # 清理所有消息历史
+        msg_history = [clean_messages(mh) for mh in msg_history]
 
         # Get posterior probabilities
         posterior = self.llm_selection.posterior(samples=num_samples)
@@ -827,6 +873,9 @@ class AsyncLLMClient:
         Returns:
             QueryResult: The result of the query.
         """
+        # 清理消息历史
+        msg_history = clean_messages(msg_history)
+        
         if llm_kwargs is None:
             llm_kwargs = sample_model_kwargs(
                 model_names=self.model_names,
@@ -1009,6 +1058,9 @@ class AsyncLLMClient:
             msg_history = [[]] * num_samples
         elif isinstance(msg_history[0], dict):
             msg_history = [msg_history] * num_samples
+        
+        # 清理所有消息历史
+        msg_history = [clean_messages(mh) for mh in msg_history]
 
         # Create async tasks
         tasks = []
@@ -1073,6 +1125,9 @@ class AsyncLLMClient:
             msg_history = [[]] * num_samples
         elif isinstance(msg_history[0], dict):
             msg_history = [msg_history] * num_samples
+        
+        # 清理所有消息历史
+        msg_history = [clean_messages(mh) for mh in msg_history]
 
         # Get posterior probabilities
         posterior = self.llm_selection.posterior(samples=num_samples)
@@ -1157,6 +1212,9 @@ class AsyncLLMClient:
         Returns:
             QueryResult: The result of the query.
         """
+        # 清理消息历史
+        msg_history = clean_messages(msg_history)
+        
         if llm_kwargs is None:
             llm_kwargs = sample_model_kwargs(
                 model_names=self.model_names,
@@ -1294,6 +1352,9 @@ def query_fn(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
 ) -> tuple[int, Optional[QueryResult]]:
+    # 清理消息历史
+    msg_history = clean_messages(msg_history)
+    
     if verbose:
         logger.info(f"==> SAMPLING: {idx + 1}/{total_samples} {list(kwargs.values())}")
     try_count = 0
@@ -1336,6 +1397,9 @@ def sample_kwargs_query_fn(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
 ) -> tuple[int, Optional[QueryResult]]:
+    # 清理消息历史
+    msg_history = clean_messages(msg_history)
+    
     kwargs = sample_model_kwargs(
         model_names=model_names,
         temperatures=temperatures,

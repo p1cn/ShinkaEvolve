@@ -29,6 +29,28 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def clean_messages(messages: List[Dict]) -> List[Dict]:
+    """清理消息列表，确保所有消息都有非空content
+    
+    Args:
+        messages: 消息列表
+        
+    Returns:
+        清理后的消息列表
+    """
+    cleaned = []
+    for msg in messages:
+        if msg.get('role') == 'assistant' and not msg.get('content', '').strip():
+            # 为空的assistant消息添加占位符
+            cleaned.append({
+                'role': 'assistant',
+                'content': '[Previous response failed]'
+            })
+        elif msg.get('content', '').strip():
+            cleaned.append(msg)
+    return cleaned
+
+
 THINKING_TOKENS = {
     "auto": 0,
     "low": 2048,
@@ -200,6 +222,9 @@ def query(
     logger.debug(f"query() called with model_name: {model_name}")
     logger.debug(f"query() kwargs: {list(kwargs.keys())}")
     
+    # 清理消息历史
+    msg_history = clean_messages(msg_history)
+    
     try:
         client = openai.OpenAI(
             base_url=base_url,
@@ -245,6 +270,9 @@ async def query_async(
     """Query the LLM asynchronously."""
     logger.debug(f"query_async() called with model_name: {model_name}")
     logger.debug(f"query_async() kwargs: {list(kwargs.keys())}")
+    
+    # 清理消息历史
+    msg_history = clean_messages(msg_history)
     
     try:
         # For now, we'll use the synchronous version wrapped
