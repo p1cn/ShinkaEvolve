@@ -200,8 +200,8 @@ def query(
     
     try:
         client = openai.OpenAI(
-            base_url=os.getenv("OPENAI_BASE_URL"),
-            api_key=os.getenv("OPENAI_API_KEY"),
+            base_url=kwargs.get("base_url", None),
+            api_key=kwargs.get("api_key", None),
         )
         logger.debug(f"OpenAI client created successfully. Base URL: {client.base_url}")
     except Exception as e:
