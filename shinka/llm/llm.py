@@ -26,13 +26,14 @@ def clean_messages(messages: List[Dict]) -> List[Dict]:
     """
     cleaned = []
     for msg in messages:
-        if msg.get('role') == 'assistant' and not msg.get('content', '').strip():
+        content = msg.get('content') or ''
+        if msg.get('role') == 'assistant' and not content.strip():
             # 为空的assistant消息添加占位符
             cleaned.append({
                 'role': 'assistant',
                 'content': '[Previous response failed]'
             })
-        elif msg.get('content', '').strip():
+        elif content.strip():
             cleaned.append(msg)
     return cleaned
 
