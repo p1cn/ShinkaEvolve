@@ -23,8 +23,8 @@ def backoff_handler(details):
         openai.RateLimitError,
         openai.APITimeoutError,
     ),
-    max_tries=20,
-    max_value=20,
+    max_tries=3,
+    max_value=3,
     on_backoff=backoff_handler,
 )
 def query_openai(

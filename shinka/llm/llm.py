@@ -10,7 +10,7 @@ from .query import sample_model_kwargs, query, query_async
 from .models import QueryResult
 from .dynamic_sampling import BanditBase, FixedSampler
 
-MAX_RETRIES = 3
+MAX_RETRIES = 2
 
 logger = logging.getLogger(__name__)
 
